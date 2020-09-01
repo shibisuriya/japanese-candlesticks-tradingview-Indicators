@@ -1,0 +1,12 @@
+//@version=4
+study(title = "Marubozu finder", overlay = true)
+
+marubozu_defect = input(title="Marubozu defect (%)", type=input.float, defval=1, minval=0, maxval=10, step=0.2)
+min_size = input(title="Min. Marubozu size (%)", type=input.float, defval=1, minval=0, maxval=10, step=0.2)
+max_size = input(title="Max. Marubozu size (%)", type=input.float, defval=10, minval=0, maxval=10, step=0.2)
+
+green_marubozu = (close > open and ((high-close)/(close-open))*100 <= marubozu_defect and ((open-low)/(close-open))*100 <= marubozu_defect and ((high-low)/close) * 100 < max_size and ((high-low)/close)*100 > min_size)
+red_marubozu = (close < open and ((high-open)/(open-close))*100 <= marubozu_defect and ((close-low)/(open-close))*100 <= marubozu_defect and ((high-low)/close) * 100 < max_size and ((high-low)/close)*100 > min_size)
+
+plotshape(green_marubozu,title="green_marubozu",text='green_marubozu',color=color.green, style=shape.arrowdown,location=location.belowbar)
+plotshape(red_marubozu,title="red_marubozu",text='red_marubozu',color=color.red, style=shape.arrowdown,location=location.abovebar)
