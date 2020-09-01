@@ -1,2 +1,2 @@
 # tradingview-pinescript
-Pine script indicators for chart analysis in tradingview charts.
+A collection of technical indicators for tradingview implement using Pine Script.
