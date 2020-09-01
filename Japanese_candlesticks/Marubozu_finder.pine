@@ -1,3 +1,5 @@
+//This indicator marks all red and green Marubozu candle present in the chart.
+
 //@version=4
 study(title = "Marubozu finder", overlay = true)
 
