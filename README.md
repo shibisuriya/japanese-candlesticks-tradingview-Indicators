@@ -1,2 +1,5 @@
-# tradingview-pinescript
-A collection of technical indicators for tradingview implement using Pine Script.
+# Trading view indicators to spot Japanese candlesticks 
+This repository contains a collection of tradingview indicators
+implemented in pinescript to spot Japanese candlesticks.
+
+
