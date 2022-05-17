@@ -1,0 +1,47 @@
+//@version=4
+study("Morning and evening star", overlay = true)
+
+//inputs
+st_min_thickness = input(title="Spinning top min. thickness (%)", type=input.float, defval=2, minval=0, maxval=80, step=0.2)
+st_max_thickness = input(title="Spinning top max. thickness (%)", type=input.float, defval=20, minval=0, maxval=80, step=0.2)
+st_range = input(title="Spinning top range length (%)", type=input.float, defval=75, minval=0, maxval=80, step=0.2)
+
+//Middle candle spinning top calculations
+candle_length = (high[1]-low[1])
+range_length = ((st_range/100) * candle_length)
+half_candle = (candle_length / 2)
+range_half = (range_length / 2)
+upper_limit = (half_candle + range_half) + low[1]
+lower_limit = (half_candle - range_half) + low[1]
+green_st = (close[1] > open[1] and (close[1] <= upper_limit and open[1] <= upper_limit) and (close[1] >= lower_limit and open[1] >= lower_limit) and (abs(open[1]-close[1])/(high[1]-low[1]))*100 <= st_max_thickness and (abs(open[1]-close[1])/(high[1]-low[1]))*100 >= st_min_thickness)
+red_st = (close[1] < open[1] and (close[1] <= upper_limit[1] and open[1] <= upper_limit) and (close[1] >= lower_limit and open[1] >= lower_limit) and (abs(open[1]-close[1])/(high[1]-low[1]))*100 <= st_max_thickness and (abs(open[1]-close[1])/(high[1]-low[1]))*100 >= st_min_thickness)
+
+//calculation for the morning star
+//P3
+ms = (close > open) //green candle
+ms := (ms and close > open[2]) //close above p1 candle's open
+ms := (ms and open > close[1]) //gap up opening
+
+//P2
+ms := (ms and open[1] < close[2]) //gap down opening
+ms := (ms and (green_st or red_st)) //spinning top or doji
+
+//P1
+ms := (ms and (open[2] > close[2])) //red candle
+
+//calculation for the evening star
+//P3
+es = (open > close) //red candle
+es := (es and close < open[2]) //close below p1 candle's open
+es := (es and open < close[1]) //gap down opening
+
+//P2
+es := (es and open[1] > close[2]) //gap up opening
+es := (es and (green_st or red_st))
+
+//P1
+es := (es and (close[2] > open[2]))
+
+//Plot
+plotshape(ms, title = "Morning star", style = shape.labelup, color = color.green, text = "Morning star", textcolor = color.white, size = size.tiny, location = location.belowbar)
+plotshape(es, title = "Evening star", style = shape.labeldown, color = color.red, text = "Evening star", textcolor = color.white, size = size.tiny, location = location.abovebar)

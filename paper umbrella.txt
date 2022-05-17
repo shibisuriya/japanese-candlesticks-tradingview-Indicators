@@ -1,0 +1,19 @@
+//This script marks all the paper umbrella candle sticks present on the chart.
+//Note: This script has no awareness of the peaks and troughs, a paper umbrella appearing near a peak is called a hanging man
+//      and it is considered as a bearish pattern whereas a paper umbrella appearing near a trough is called a hammer and it is 
+//      considered as a bullish pattern. This script marks all the paper umbrella(s) present on the chart irrepective of their
+//      position. 
+//Note: The color of the paper umbrella has very little significance.
+
+//@version=4
+study(title = "Paper umbrella finder", overlay = true)
+
+wickIstoBody = input(title="Lower (%)", type=input.float, defval=15, minval=0, maxval=40, step=0.2)
+pu_max_thickness = input(title="Paper umbrella max. thickness (%)", type=input.float, defval=33, minval=0, maxval=75, step=0.2)
+pu_min_thickness = input(title="Paper umbrella min. thickness (%)", type=input.float, defval=3, minval=0, maxval=75, step=0.2)
+
+green_pu = (((high-close)/(close-low)) * 100 <= pu_defect and ((close-open)/(high-low))*100 <= pu_max_thickness and ((close-open)/(high-low))*100 >= pu_min_thickness)
+red_pu = (((high-open)/(open-low)) * 100 <= pu_defect and ((open-close)/(high-low))*100 <= pu_max_thickness and ((open-close)/(high-low))*100 >= pu_min_thickness)
+
+plotshape(green_pu,title="PU",text='PU',color=color.green, style=shape.arrowdown,location=location.abovebar)
+plotshape(red_pu,title="PU",text='PU',color=color.red, style=shape.arrowdown,location=location.abovebar)

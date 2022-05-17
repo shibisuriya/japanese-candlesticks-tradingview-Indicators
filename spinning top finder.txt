@@ -1,0 +1,20 @@
+//@version=4
+study(title = "Spinning top finder", overlay = true)
+
+st_min_thickness = input(title="Spinning top min. thickness (%)", type=input.float, defval=2, minval=0, maxval=80, step=0.2)
+st_max_thickness = input(title="Spinning top max. thickness (%)", type=input.float, defval=20, minval=0, maxval=80, step=0.2)
+st_range = input(title="Spinning top range length (%)", type=input.float, defval=75, minval=0, maxval=80, step=0.2)
+
+candle_length = (high-low)
+range_length = ((st_range/100) * candle_length)
+half_candle = (candle_length / 2)
+range_half = (range_length / 2)
+upper_limit = (half_candle + range_half) + low
+lower_limit = (half_candle - range_half) + low
+
+
+green_st = (close > open and (close <= upper_limit and open <= upper_limit) and (close >= lower_limit and open >= lower_limit) and (abs(open-close)/(high-low))*100 <= st_max_thickness and (abs(open-close)/(high-low))*100 >= st_min_thickness)
+red_st = (close < open and (close <= upper_limit and open <= upper_limit) and (close >= lower_limit and open >= lower_limit) and (abs(open-close)/(high-low))*100 <= st_max_thickness and (abs(open-close)/(high-low))*100 >= st_min_thickness)
+
+plotshape(green_st,title="ST",text='ST',color=color.green, style=shape.arrowdown,location=location.abovebar)
+plotshape(red_st,title="ST",text='ST',color=color.red, style=shape.arrowdown,location=location.abovebar)

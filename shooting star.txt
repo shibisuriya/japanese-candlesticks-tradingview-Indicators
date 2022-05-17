@@ -1,0 +1,12 @@
+//@version=4
+study(title = "Shooting star finder", overlay = true)
+
+ss_defect = input(title="Shooting star defect (%)", type=input.float, defval=15, minval=0, maxval=40, step=0.2)
+ss_max_thickness = input(title="Shooting star max. thickness (%)", type=input.float, defval=33, minval=0, maxval=75, step=0.2)
+ss_min_thickness = input(title="Shooting star min. thickness (%)", type=input.float, defval=3, minval=0, maxval=75, step=0.2)
+
+green_ss = (((open-low)/(high-open)) * 100 <= ss_defect and ((close-open)/(high-low))*100 <= ss_max_thickness and ((close-open)/(high-low))*100 >= ss_min_thickness)
+red_ss = (((close-low)/(high-close)) * 100 <= ss_defect and ((open-close)/(high-low))*100 <= ss_max_thickness and ((open-close)/(high-low))*100 >= ss_min_thickness)
+
+plotshape(green_ss,title="SS",text='SS',color=color.green, style=shape.arrowdown,location=location.abovebar)
+plotshape(red_ss,title="SS",text='SS',color=color.red, style=shape.arrowdown,location=location.abovebar)

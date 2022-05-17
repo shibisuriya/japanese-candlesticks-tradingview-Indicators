@@ -1,0 +1,156 @@
+//@version=4
+study("All candle stick patterns, overlay = true)
+
+//inputs
+engulfing_sl = input(defval = false, title = "Engulfing stoploss?", type = input.bool)
+perfect_engulf = input(defval = false, title = "Perfect engulf?", type = input.bool)
+engulf_by_open_close = input(defval = false, title = "First candle's high and low engulfed by open and close of the second candle?")
+
+
+//calculation
+//mandatory
+bearE = ((close[1] > open[1]) and (close < open)) //green candle first then red candle
+bearE := (bearE and (close[1] < open) and (open[1] < open)) //
+bearE := (bearE and (close[1] > close) and (open[1] > close))
+
+//optional
+if(perfect_engulf == true)
+    bearE := (bearE and (high[1] < high) and (low[1] < high))
+    bearE := (bearE and (high[1] > low) and (low[1] > low))
+
+if(engulf_by_open_close == true)
+    bearE := (bearE and high[1] < open and low[1] > close)
+
+//mandatory
+bullE = ((close[1] < open[1]) and (close > open)) //red candle first then green candle
+bullE := (bullE and (open[1] < close) and (close[1] < close))
+bullE := (bullE and (open[1] > open) and (close[1] > open))
+
+//optional
+if(perfect_engulf == true)
+    bullE := (bullE and (high[1] < high) and (low[1] < high))
+    bullE := (bullE and (high[1] > low) and (low[1] > low))
+
+if(engulf_by_open_close == true)
+    bullE := (bullE and close > high[1] and open < low[1])
+
+
+
+//plot
+plotshape(bearE, "Bearish engulfing", style = shape.labeldown, color = color.red, text = "Bearish E", size = size.tiny, textcolor = color.white, location = location.abovebar)
+plotshape(bullE, "Bullish engulfing", style = shape.labelup, color = color.green, text = "Bullish E", size = size.tiny, textcolor = color.white, location = location.belowbar)
+
+
+//inputs
+perfect_harami = input(defval = false, title = "Pefect harami?", type = input.bool)
+contained_by_open_close = input(defval = fales, title = "P2's high and low contained within P1's open and close?")
+
+//calculation
+//mandatory
+bullish_harami = ((close[1] < open[1]) and (close > open))
+bullish_harami := (bullish_harami and (open > close[1]) and (open[1] > close))
+
+bearish_harami = ((close[1] > open[1]) and (open > close))
+bearish_harami := (bearish_harami and (close[1] > open) and (close > open[1]))
+
+
+//perfect harami
+if(perfect_harami == true)
+    bullish_harami := (bullish_harami and (high[1] > high) and (low[1] < low))
+    bearish_harami := (bearish_harami and (high[1] > high) and (low[1] < low))
+
+
+//P2's high and low contained within P1's open and close?
+if(contained_by_open_close == true)
+    bullish_harami := (bullish_harami and (open[1] > high) and (low > close[1]))
+    bearish_harami := (bearish_harami and (close[1] > high) and (low > open[1]))
+        
+plotshape(bullish_harami, "Bullish harami", shape.labelup, color = color.green, text = "Bullish harami", textcolor = color.white, location = location.belowbar)
+plotshape(bearish_harami, "Bearish harami", shape.labeldown, color = color.red, text = "Bearish harami", textcolor = color.white, location = location.abovebar)
+
+
+marubozu_defect = input(title="Marubozu defect (%)", type=input.float, defval=1, minval=0, maxval=10, step=0.2)
+min_size = input(title="Min. Marubozu size (%)", type=input.float, defval=1, minval=0, maxval=10, step=0.2)
+max_size = input(title="Max. Marubozu size (%)", type=input.float, defval=10, minval=0, maxval=10, step=0.2)
+
+green_marubozu = (close > open and ((high-close)/(close-open))*100 <= marubozu_defect and ((open-low)/(close-open))*100 <= marubozu_defect and ((high-low)/close) * 100 < max_size and ((high-low)/close)*100 > min_size)
+red_marubozu = (close < open and ((high-open)/(open-close))*100 <= marubozu_defect and ((close-low)/(open-close))*100 <= marubozu_defect and ((high-low)/close) * 100 < max_size and ((high-low)/close)*100 > min_size)
+
+plotshape(green_marubozu,title="green_marubozu",text='green_marubozu',color=color.green, style=shape.arrowdown,location=location.belowbar)
+plotshape(red_marubozu,title="red_marubozu",text='red_marubozu',color=color.red, style=shape.arrowdown,location=location.abovebar)
+
+
+//inputs
+st_min_thickness = input(title="Spinning top min. thickness (%)", type=input.float, defval=2, minval=0, maxval=80, step=0.2)
+st_max_thickness = input(title="Spinning top max. thickness (%)", type=input.float, defval=20, minval=0, maxval=80, step=0.2)
+st_range = input(title="Spinning top range length (%)", type=input.float, defval=75, minval=0, maxval=80, step=0.2)
+
+//Middle candle spinning top calculations
+candle_length = (high[1]-low[1])
+range_length = ((st_range/100) * candle_length)
+half_candle = (candle_length / 2)
+range_half = (range_length / 2)
+upper_limit = (half_candle + range_half) + low[1]
+lower_limit = (half_candle - range_half) + low[1]
+green_st = (close[1] > open[1] and (close[1] <= upper_limit and open[1] <= upper_limit) and (close[1] >= lower_limit and open[1] >= lower_limit) and (abs(open[1]-close[1])/(high[1]-low[1]))*100 <= st_max_thickness and (abs(open[1]-close[1])/(high[1]-low[1]))*100 >= st_min_thickness)
+red_st = (close[1] < open[1] and (close[1] <= upper_limit[1] and open[1] <= upper_limit) and (close[1] >= lower_limit and open[1] >= lower_limit) and (abs(open[1]-close[1])/(high[1]-low[1]))*100 <= st_max_thickness and (abs(open[1]-close[1])/(high[1]-low[1]))*100 >= st_min_thickness)
+
+//calculation for the morning star
+//P3
+ms = (close > open) //green candle
+ms := (ms and close > open[2]) //close above p1 candle's open
+ms := (ms and open > close[1]) //gap up opening
+
+//P2
+ms := (ms and open[1] < close[2]) //gap down opening
+ms := (ms and (green_st or red_st)) //spinning top or doji
+
+//P1
+ms := (ms and (open[2] > close[2])) //red candle
+
+//calculation for the evening star
+//P3
+es = (open > close) //red candle
+es := (es and close < open[2]) //close below p1 candle's open
+es := (es and open < close[1]) //gap down opening
+
+//P2
+es := (es and open[1] > close[2]) //gap up opening
+es := (es and (green_st or red_st))
+
+//P1
+es := (es and (close[2] > open[2]))
+
+//Plot
+plotshape(ms, title = "Morning star", style = shape.labelup, color = color.green, text = "Morning star", textcolor = color.white, size = size.tiny, location = location.belowbar)
+plotshape(es, title = "Evening star", style = shape.labeldown, color = color.red, text = "Evening star", textcolor = color.white, size = size.tiny, location = location.abovebar)
+
+
+pu_defect = input(title="Paper umbrella defect (%)", type=input.float, defval=15, minval=0, maxval=40, step=0.2)
+pu_max_thickness = input(title="Paper umbrella max. thickness (%)", type=input.float, defval=33, minval=0, maxval=75, step=0.2)
+pu_min_thickness = input(title="Paper umbrella min. thickness (%)", type=input.float, defval=3, minval=0, maxval=75, step=0.2)
+
+green_pu = (((high-close)/(close-low)) * 100 <= pu_defect and ((close-open)/(high-low))*100 <= pu_max_thickness and ((close-open)/(high-low))*100 >= pu_min_thickness)
+red_pu = (((high-open)/(open-low)) * 100 <= pu_defect and ((open-close)/(high-low))*100 <= pu_max_thickness and ((open-close)/(high-low))*100 >= pu_min_thickness)
+
+plotshape(green_pu,title="PU",text='PU',color=color.green, style=shape.arrowdown,location=location.abovebar)
+plotshape(red_pu,title="PU",text='PU',color=color.red, style=shape.arrowdown,location=location.abovebar)
+
+
+st_min_thickness = input(title="Spinning top min. thickness (%)", type=input.float, defval=2, minval=0, maxval=80, step=0.2)
+st_max_thickness = input(title="Spinning top max. thickness (%)", type=input.float, defval=20, minval=0, maxval=80, step=0.2)
+st_range = input(title="Spinning top range length (%)", type=input.float, defval=75, minval=0, maxval=80, step=0.2)
+
+candle_length = (high-low)
+range_length = ((st_range/100) * candle_length)
+half_candle = (candle_length / 2)
+range_half = (range_length / 2)
+upper_limit = (half_candle + range_half) + low
+lower_limit = (half_candle - range_half) + low
+
+
+green_st = (close > open and (close <= upper_limit and open <= upper_limit) and (close >= lower_limit and open >= lower_limit) and (abs(open-close)/(high-low))*100 <= st_max_thickness and (abs(open-close)/(high-low))*100 >= st_min_thickness)
+red_st = (close < open and (close <= upper_limit and open <= upper_limit) and (close >= lower_limit and open >= lower_limit) and (abs(open-close)/(high-low))*100 <= st_max_thickness and (abs(open-close)/(high-low))*100 >= st_min_thickness)
+
+plotshape(green_st,title="ST",text='ST',color=color.green, style=shape.arrowdown,location=location.abovebar)
+plotshape(red_st,title="ST",text='ST',color=color.red, style=shape.arrowdown,location=location.abovebar)

@@ -1,0 +1,21 @@
+//@version=4
+study("Upstox brokerage calculator", overlay = true)
+qty = input(defval = 100, title = "qty", type = input.integer)
+buyPrice = input(defval = 100, title = "Buy price", type = input.float)
+sellPrice = input(defval = 101, title = "Sell price", type = input.float)
+totalCharges(qty, buyPrice, sellPrice)=>
+    turnover = qty * (buyPrice + sellPrice)
+    brokerage = turnover * 0.0001
+    stt = (0.025/100) * qty * sellPrice
+    transactionCharges = (0.00325/100) * turnover
+    clearingCharges = 0
+    GST = (brokerage + transactionCharges) * (18.0/100)
+    stampDuty = turnover * (0.006)/100
+    sebiTurnoverFees = 0.0000015 * turnover
+    total = brokerage + stt + transactionCharges + clearingCharges + GST + stampDuty + sebiTurnoverFees
+    [total]
+
+[charges] = totalCharges(qty, buyPrice, sellPrice) 
+l = label.new(bar_index, high, color = color.red, textcolor = color.white, text = tostring(charges))
+label.delete(l[1])
+    

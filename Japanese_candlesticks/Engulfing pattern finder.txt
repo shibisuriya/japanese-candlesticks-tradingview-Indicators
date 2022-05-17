@@ -1,0 +1,51 @@
+//This script marks all the engulfing pattern (both bullish and bearish) on the chart.
+//Note: This script has no awareness of the peaks and troughs (bullish engulfing patterns have more significance if they appear
+//      near the troughs and bearish engulfing patterns have more significance if they appear near the peaks), 
+//		it just marks candle sticks which form the engulfing pattern, even if they are present at irrelvant positions,
+//      that is, it will mark a bearish engulfing pattern even if it appears near a trough.
+ 
+//@version=4
+study("Engulfing patterns", overlay = true)
+
+//Inputs
+//perfect_engulf refers to the engulfing pattern in which the real body of the second candle engulfs the real body of the
+//first candle and the wicks of the first candle are engulfed by high and low of the second candle.
+perfect_engulf = input(defval = false, title = "Perfect engulf?", type = input.bool)
+
+//engulf_by_open_close refers to the engulfing pattern in which the entire first candle (including the wicks) is engulfed 
+//by the open and close of the second candle.
+engulf_by_open_close = input(defval = false, title = "First candle's high and low engulfed by open and close of the second candle?")
+
+//calculation
+//Bearish engulfing.
+//mandatory
+bearE = ((close[1] > open[1]) and (close < open)) //green candle first then red candle
+bearE := (bearE and (close[1] < open) and (open[1] < open)) 
+bearE := (bearE and (close[1] > close) and (open[1] > close))
+
+//optional
+if(perfect_engulf == true)
+    bearE := (bearE and (high[1] < high) and (low[1] < high))
+    bearE := (bearE and (high[1] > low) and (low[1] > low))
+
+if(engulf_by_open_close == true)
+    bearE := (bearE and high[1] < open and low[1] > close)
+
+//Bullish engulfing.
+//mandatory
+bullE = ((close[1] < open[1]) and (close > open)) //red candle first then green candle
+bullE := (bullE and (open[1] < close) and (close[1] < close))
+bullE := (bullE and (open[1] > open) and (close[1] > open))
+
+//optional
+if(perfect_engulf == true)
+    bullE := (bullE and (high[1] < high) and (low[1] < high))
+    bullE := (bullE and (high[1] > low) and (low[1] > low))
+
+if(engulf_by_open_close == true)
+    bullE := (bullE and close > high[1] and open < low[1])
+
+//Plot to chart.
+plotshape(bearE, "Bearish engulfing", style = shape.triangledown, color = color.red, text = "E", size = size.small, location = location.abovebar)
+plotshape(bullE, "Bullish engulfing", style = shape.triangleup, color = color.green, text = "E", size = size.small, location = location.belowbar)
+

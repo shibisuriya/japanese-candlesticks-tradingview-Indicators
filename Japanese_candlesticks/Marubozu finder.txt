@@ -1,0 +1,48 @@
+//This script marks all the Marubozu(s) (both bullish and bearish) present in the chart.
+
+//@version=4
+study(title = "Marubozu finder", overlay = true)
+
+//Inputs
+//Size of the upper wick relative to the size of the real body of the candle. 
+//Note: If upperWickIstoBody is set to 0% then there will be no upper wick in the Marubozu.
+upperWickIstoBody = input(title="Upper wick : Real body (%)", type=input.float, defval=10, minval=0, maxval=50, step=0.2)
+
+//Size of the lower wick relative to the size of the real body of the candle.
+//Note: If lowerWickIstoBody is set to 0% then there will be no lower wick in the Marubozu.
+lowerWickIstoBody = input(title="Lower wick : Real body (%)", type=input.float, defval=10, minval=0, maxval=50, step=0.2)
+
+//Note: If upperWickIstoBody and lowerWickIstoBody is set to 0% then only 'Ideal Marubozu(s)' will be marked. 
+//		Ideal Marubozu(s) are Marubozu(s) with no upper and lower wick.
+
+//Minimum length of the Marubozu allowed relative to the close price of the Marubozu.
+//For example: If the close price of the candle is Rs. 10 and min_size is set to 20% then candle's length should be 
+//             more than or equal to Rs. 2.
+//min_size is used to prevent the script from marking candles which have high = low (i.e., flat candles).
+min_size = input(title="Min. Marubozu size (%)", type=input.float, defval=1, minval=0, maxval=10, step=0.2)
+
+//Maximum length of the Marubozu allowed relative to the close price of the Marubozu.
+//For example: If the close price of the candle is Rs. 10 and max_size is set to 30% then the candle's length should be
+//             less than or equal to Rs. 3.
+//max_size is used to prevent the script from marking large Marubozu(s). Large Marubozu(s) are difficult to trade because
+//the stop-loss point is deep for these candles.
+max_size = input(title="Max. Marubozu size (%)", type=input.float, defval=10, minval=0, maxval=10, step=0.2)
+
+//Calculations
+//Bullish Marubozu
+gm = close > open
+gm := gm and ((high-close)/(close-open))*100 <= upperWickIstoBody
+gm := gm and ((open-low)/(close-open))*100 <= lowerWickIstoBody
+gm := gm and ((high-low)/close) * 100 < max_size
+gm := gm and ((high-low)/close)*100 > min_size
+
+//Bearish Marubozu
+rm = close < open 
+rm := rm and ((high-open)/(open-close))*100 <= upperWickIstoBody
+rm := rm and ((close-low)/(open-close))*100 <= lowerWickIstoBody 
+rm := rm and ((high-low)/close) * 100 < max_size 
+rm := rm and ((high-low)/close)*100 > min_size
+
+//Plot to chart.
+plotshape(gm,title="Green Marubozu",text="M",color=color.green,size=size.normal,style=shape.triangleup,location=location.belowbar)
+plotshape(rm,title="Red Marubozu",text="M",color=color.red,size=size.normal,style=shape.triangledown,location=location.abovebar)

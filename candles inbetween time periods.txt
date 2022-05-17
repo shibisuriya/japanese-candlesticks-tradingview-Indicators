@@ -1,0 +1,10 @@
+//@version=4
+study("New script", overlay = true)
+from_hour = input(defval = 9, title = "From hour", type = input.integer, minval = 9, maxval = 15, step = 1)
+from_minute = input(defval = 0, title = "From minute", type = input.integer, minval = 0, maxval = 60, step = 1)
+to_hour = input(defval = 15, title = "To hour", type = input.integer, minval = 9, maxval = 15, step = 1)
+to_minute = input(defval = 60, title = "To minute", type = input.integer, minval = 0, maxval = 60, step = 1)
+
+if((hour >= from_hour and minute >= from_minute) and (hour <= to_hour and minute >= to_hour) )
+    label.new(bar_index, y = close, text = tostring(hour) + ":" + tostring(minute), yloc = yloc.abovebar, color = color.black, textcolor = color.white, size = size.tiny)
+    

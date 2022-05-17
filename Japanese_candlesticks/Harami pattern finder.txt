@@ -1,0 +1,43 @@
+//This script marks all the Harami pattern(s) (both bullish and bearish) present in the chart.
+//Note: This script has no awareness of the peaks and troughs (bullish Harami pattern(s) have more significance when they appear
+//      near the troughs and bearish harami pattern(s) have more significance when they appear near the peaks), 
+//		it just marks candle sticks which form the Harami pattern, even if they are present at irrelvant positions,
+//      that is, the script will mark a bearish Harami pattern even if it appears near a trough.
+ 
+//@version=4
+study("Harami pattern finder", overlay = true)
+
+
+//Inputs
+//perfect_harami refers to the Harami pattern in which the real body of the second candle is contained by the real body of the
+//first candle and the wicks of the second candle are contained by high and low of the first candle.
+perfect_harami = input(defval = false, title = "Pefect harami?", type = input.bool)
+
+//contained_by_open_close refers to the Harami pattern in which the entire second candle (including the wicks) is contained 
+//by the open and close of the first candle.
+contained_by_open_close = input(defval = false, title = "C2's high and low contained within C1's open and close?")
+
+//Calculations
+//Mandatory
+//Bullish Harami
+bullish_harami = ((close[1] < open[1]) and (close > open))
+bullish_harami := (bullish_harami and (open > close[1]) and (open[1] > close))
+
+//Bearish Harami
+bearish_harami = ((close[1] > open[1]) and (open > close))
+bearish_harami := (bearish_harami and (close[1] > open) and (close > open[1]))
+
+//Optional
+//Perfect harami
+if(perfect_harami == true)
+    bullish_harami := (bullish_harami and (high[1] > high) and (low[1] < low))
+    bearish_harami := (bearish_harami and (high[1] > high) and (low[1] < low))
+
+//C2's high and low contained within C1's open and close?
+if(contained_by_open_close == true)
+    bullish_harami := (bullish_harami and (open[1] > high) and (low > close[1]))
+    bearish_harami := (bearish_harami and (close[1] > high) and (low > open[1]))
+
+//Plot to chart.        
+plotshape(bullish_harami, "Bullish harami", shape.triangleup, color = color.green, text = "H", textcolor = color.green, location = location.belowbar, size = size.small)
+plotshape(bearish_harami, "Bearish harami", shape.triangledown, color = color.red, text = "H", textcolor = color.red, location = location.abovebar, size = size.small)

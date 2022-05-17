@@ -1,0 +1,62 @@
+//@version=4
+study(title = "Paper umbrella trader", overlay = true)
+max_loss = input(defval = 300, title = "Max. loss per trade", type = input.float)
+limit_percentage = input(defval = 50, title = "limit order buy percentage", type = input.float)
+
+qty = input(defval = 100, title = "qty", type = input.integer)
+buyPrice = input(defval = 100, title = "Buy price", type = input.float)
+sellPrice = input(defval = 101, title = "Sell price", type = input.float)
+
+pu_defect = input(title="Paper umbrella defect (%)", type=input.float, defval=15, minval=0, maxval=40, step=0.2)
+pu_max_thickness = input(title="Paper umbrella max. thickness (%)", type=input.float, defval=33, minval=0, maxval=75, step=0.2)
+pu_min_thickness = input(title="Paper umbrella min. thickness (%)", type=input.float, defval=3, minval=0, maxval=75, step=0.2)
+
+green_pu = (((high-close)/(close-low)) * 100 <= pu_defect and ((close-open)/(high-low))*100 <= pu_max_thickness and ((close-open)/(high-low))*100 >= pu_min_thickness)
+red_pu = (((high-open)/(open-low)) * 100 <= pu_defect and ((open-close)/(high-low))*100 <= pu_max_thickness and ((open-close)/(high-low))*100 >= pu_min_thickness)
+
+plotshape(green_pu,title="PU",text='PU',color=color.green, style=shape.labelup,location=location.belowbar, size = size.tiny, textcolor = color.white)
+plotshape(red_pu,title="PU",text='PU',color=color.red, style=shape.labeldown,location=location.abovebar, size = size.tiny, textcolor = color.white)
+
+limit = (limit_percentage * (high-low)) / 100
+sl = (low - limit)
+limit := (high - limit)
+position_size = floor(max_loss/(limit - sl))
+size = limit - sl
+target = size * 2
+target := limit + target
+
+totalCharges(qty, buyPrice, sellPrice)=>
+    turnover = qty * (buyPrice + sellPrice)
+    brokerage = turnover * 0.0001
+    if(brokerage > 40)
+        brokerage := 40
+    stt = (0.025/100) * qty * sellPrice
+    transactionCharges = (0.00325/100) * turnover
+    clearingCharges = 0
+    GST = (brokerage + transactionCharges) * (18.0/100)
+    stampDuty = turnover * (0.006)/100
+    sebiTurnoverFees = 0.0000015 * turnover
+    total = brokerage + stt + transactionCharges + clearingCharges + GST + stampDuty + sebiTurnoverFees
+    
+    if(sellPrice >= buyPrice)
+        total := qty*(sellPrice-buyPrice) - total
+    else
+        total := qty*(buyPrice-sellPrice) + total
+        
+    [total]
+
+
+if(green_pu or red_pu)
+    
+    buy_label = label.new(bar_index, limit, text = "Buy " + tostring(position_size) + " @ " +tostring(limit), style = label.style_label_up, color = color.blue, textcolor = color.white) 
+    buy_line = line.new(bar_index, limit, bar_index[4], limit, color = color.blue, width = 4)
+    
+    [loss] = totalCharges(position_size, limit, sl)
+    
+    sl_line = line.new(bar_index, sl, bar_index[4], sl, color = color.red, width = 4)
+    sl_label = label.new(bar_index, sl, text = "SL @ " +tostring(sl) + "\n loss = " + tostring(loss), style = label.style_label_up, color = color.red, textcolor = color.white) 
+    
+    [profit] = totalCharges(position_size, limit, target)
+    
+    target_line  = line.new(bar_index, target, bar_index[4], target, color = color.green, width = 4)
+    target_label = label.new(bar_index, target, text = "Target @ " +tostring(target) + "\n Profit : " +tostring(profit), style = label.style_label_up, color = color.green, textcolor = color.white) 
