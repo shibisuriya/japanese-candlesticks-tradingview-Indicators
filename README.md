@@ -9,3 +9,16 @@ I have written the description provided in the material about each candlestick p
 ## How to use?
 
 To use these indicators, open a full featured Tradingview chart, paste the script in the Pine Editor, and press the Add to Chart button.
+
+## Candlestick patterns supported
+
+1. The Marubozu
+2. The Spinning Top
+3. Paper Umbrella
+4. The Shooting Star
+5. The Engulfing pattern
+6. The Piercing Pattern
+7. The Dark Cloud Cover
+8. The Harami Pattern
+9. The Morning Star
+10. The Evening Star
